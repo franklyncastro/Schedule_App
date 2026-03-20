@@ -1,0 +1,113 @@
+.page { min-height: 100vh; background: var(--off-white); }
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #0A1F15, #0F2A1E);
+  padding: 2.5rem 2rem; text-align: center;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(16,185,129,.15), transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(16,185,129,.1), transparent 50%);
+  pointer-events: none;
+}
+.headerLogo {
+  font-size: 2.8rem; margin-bottom: .6rem;
+  position: relative; z-index: 1;
+}
+.headerName {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem; font-weight: 900; color: #fff;
+  position: relative; z-index: 1;
+}
+.headerSpecialty {
+  font-size: .78rem; color: rgba(255,255,255,.6);
+  margin-top: .3rem; position: relative; z-index: 1;
+}
+
+/* ── CONTAINER ───────────────────────────────────────────────────────────── */
+.container {
+  max-width: 500px; margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* ── CARD ────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-lg); text-align: center;
+  animation: fadeUp .5s ease;
+}
+.icon {
+  font-size: 3.5rem; margin-bottom: 1rem; display: block;
+}
+.title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem; font-weight: 900; color: var(--text);
+  margin-bottom: 1rem;
+}
+.msg {
+  font-size: .9rem; color: var(--text-mid); line-height: 1.75;
+}
+
+/* ── INFO CITA ───────────────────────────────────────────────────────────── */
+.citaInfo {
+  background: var(--green-pale); border: 1px solid var(--green-light);
+  border-radius: var(--radius); padding: 1rem 1.25rem;
+  margin: 1rem 0; text-align: left;
+  display: flex; flex-direction: column; gap: .45rem;
+  font-size: .88rem; color: var(--text-mid);
+}
+.citaInfo p strong { color: var(--text); }
+
+/* ── CONFIRMADO ──────────────────────────────────────────────────────────── */
+.confirmMsg {
+  background: #F0FDF4; border: 1px solid #BBF7D0;
+  border-radius: var(--radius); padding: 1.25rem;
+  margin: 1.25rem 0; text-align: left;
+  display: flex; flex-direction: column; gap: .65rem;
+  font-size: .85rem; color: #065F46; line-height: 1.75;
+}
+.orderNote {
+  background: var(--green-pale); border-radius: 8px;
+  padding: .75rem; color: var(--green-dark); font-size: .82rem;
+}
+
+/* ── BOTONES DE ACCIÓN ───────────────────────────────────────────────────── */
+.actionBtns {
+  display: flex; flex-direction: column; gap: .75rem; margin-top: 1.75rem;
+}
+.cancelBtn {
+  display: flex; align-items: center; justify-content: center;
+  background: #FEF2F2; color: #991B1B;
+  border: 1.5px solid #FECACA; border-radius: 50px;
+  padding: .9rem; font-family: 'Nunito', sans-serif;
+  font-size: .9rem; font-weight: 800; transition: background .2s, border-color .2s;
+  width: 100%;
+}
+.cancelBtn:hover { background: #FEE2E2; border-color: #FCA5A5; }
+
+/* ── CONTACTO DOCTOR ─────────────────────────────────────────────────────── */
+.doctorContact {
+  margin-top: 1.5rem; padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: .82rem; color: var(--text-mid);
+}
+.waLink {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: #22C55E; color: #fff;
+  padding: .55rem 1.4rem; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .82rem;
+  margin-top: .6rem; transition: background .2s, transform .15s;
+  box-shadow: 0 4px 12px rgba(34,197,94,.3);
+}
+.waLink:hover { background: #16A34A; transform: translateY(-1px); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .card { padding: 2rem 1.25rem; }
+  .container { padding: 1.5rem 1rem 3rem; }
+}

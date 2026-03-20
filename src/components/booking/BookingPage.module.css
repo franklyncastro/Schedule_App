@@ -1,0 +1,204 @@
+.page { min-height: 100vh; background: var(--off-white); }
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #0A1F15, #0F2A1E);
+  padding: 1.1rem 2rem;
+  display: flex; align-items: center; gap: 1.25rem;
+  position: relative; overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 50%, rgba(16,185,129,.15), transparent 60%);
+  pointer-events: none;
+}
+.backBtn {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  color: #fff; padding: .45rem 1.1rem; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-size: .8rem; font-weight: 700;
+  transition: background .2s; position: relative; z-index: 1;
+}
+.backBtn:hover { background: rgba(255,255,255,.2); }
+.headerInfo { text-align: center; flex: 1; position: relative; z-index: 1; }
+.headerName {
+  font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #fff;
+}
+.headerLicense { font-size: .72rem; color: rgba(255,255,255,.6); margin-top: .1rem; }
+
+/* ── CALENDARIO ──────────────────────────────────────────────────────────── */
+.calendarCard {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2rem;
+  box-shadow: var(--shadow); animation: fadeUp .4s ease;
+  max-width: 640px; margin: 0 auto;
+}
+.calendarTitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.2rem; font-weight: 900; color: var(--text);
+  text-align: center; margin-bottom: 1.75rem;
+}
+
+.dayNav {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--green-pale); border: 1px solid var(--green-light);
+  border-radius: var(--radius); padding: .85rem 1rem; margin-bottom: 1.5rem;
+}
+.dayNavBtn {
+  background: var(--green); color: #fff; border: none;
+  width: 34px; height: 34px; border-radius: 50%;
+  font-size: 1rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .2s, transform .15s;
+  box-shadow: 0 2px 8px rgba(16,185,129,.3);
+}
+.dayNavBtn:hover:not(:disabled) { background: var(--green-dark); transform: scale(1.08); }
+.dayNavBtn:disabled { background: var(--border); color: var(--text-light); cursor: not-allowed; box-shadow: none; }
+
+.dayLabel {
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem; font-weight: 800; color: var(--green-dark);
+  text-transform: capitalize;
+}
+
+.slotsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .6rem;
+  margin-bottom: 1.5rem;
+}
+
+.slotBtn {
+  background: var(--white); color: var(--green-dark);
+  border: 1.5px solid var(--green-light);
+  padding: .55rem .5rem; border-radius: 50px;
+  font-family: 'Nunito', sans-serif; font-size: .85rem; font-weight: 800;
+  transition: background .15s, border-color .15s, transform .1s, box-shadow .15s;
+  width: 100%; text-align: center;
+}
+
+.slotBtn:hover {
+  background: var(--green); color: #fff;
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16,185,129,.3);
+}
+.slotBtn:active { transform: scale(.96); }
+
+.calendarNote {
+  font-size: .78rem; color: var(--text-mid); text-align: center;
+  background: var(--green-pale); padding: .85rem 1rem;
+  border-radius: var(--radius); border: 1px solid var(--green-light);
+  line-height: 1.6;
+}
+
+.noSlots {
+  text-align: center; padding: 5rem 1rem; color: var(--text-mid);
+}
+.noSlotsIcon { font-size: 3.5rem; margin-bottom: 1rem; opacity: .5; }
+
+/* ── FORMULARIO ──────────────────────────────────────────────────────────── */
+.formCard {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2rem;
+  box-shadow: var(--shadow); animation: fadeUp .4s ease;
+  max-width: 600px; margin: 0 auto;
+}
+
+.citaHeader {
+  text-align: center; margin-bottom: 2rem;
+  padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+}
+.citaLabel {
+  font-size: .7rem; color: var(--text-light); font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.citaDate {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.05rem; font-weight: 900; color: var(--text);
+  margin: .5rem 0; text-transform: capitalize;
+}
+.changeDateBtn {
+  background: none; border: none;
+  color: var(--green); font-size: .78rem; font-weight: 700;
+  transition: opacity .2s; padding: 0;
+}
+.changeDateBtn:hover { opacity: .7; }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* Términos */
+.checkRow {
+  display: flex; align-items: flex-start; gap: .6rem; margin-bottom: .5rem;
+}
+.checkRow input[type="checkbox"] {
+  margin-top: .2rem; accent-color: var(--green);
+  width: 16px; height: 16px; flex-shrink: 0;
+}
+.checkLabel { font-size: .82rem; color: var(--text-mid); line-height: 1.5; }
+.termLink { color: var(--green); text-decoration: underline; }
+
+/* reCAPTCHA simulado */
+.captchaBox {
+  display: flex; align-items: center; gap: .75rem;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  padding: .9rem 1rem; margin-top: .75rem;
+  background: var(--off-white);
+  transition: border-color .2s;
+}
+.captchaBox:focus-within { border-color: var(--green); }
+.captchaBox input[type="checkbox"] {
+  accent-color: var(--green); width: 18px; height: 18px;
+}
+.captchaLabel { font-size: .9rem; font-weight: 600; color: var(--text); flex: 1; }
+.captchaBadge { text-align: right; font-size: .62rem; color: var(--text-light); }
+
+/* Error banner */
+.errorBanner {
+  background: #FEF2F2; border: 1px solid #FECACA;
+  border-radius: var(--radius); padding: .9rem 1rem;
+  font-size: .82rem; color: #991B1B; font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+/* ── ÉXITO ───────────────────────────────────────────────────────────────── */
+.successCard {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-lg); text-align: center;
+  max-width: 540px; margin: 0 auto;
+  animation: fadeUp .5s ease;
+}
+.successIcon { font-size: 3.5rem; margin-bottom: 1rem; }
+.successTitle {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.6rem; font-weight: 900; color: var(--text); margin-bottom: .5rem;
+}
+.successDate {
+  font-size: .95rem; color: var(--green-dark);
+  font-weight: 600; margin-bottom: 1.5rem; text-transform: capitalize;
+}
+.successMsg {
+  background: var(--green-pale); border: 1px solid var(--green-light);
+  border-radius: var(--radius); padding: 1.25rem;
+  display: flex; flex-direction: column; gap: .75rem;
+  font-size: .88rem; color: var(--text-mid); line-height: 1.7;
+  text-align: left; margin-bottom: 1.25rem;
+}
+.successNote {
+  background: rgba(16,185,129,.1); border-radius: 8px;
+  padding: .75rem; font-size: .82rem; color: var(--green-dark);
+}
+.citaId { font-size: .75rem; color: var(--text-light); }
+.citaId code {
+  background: var(--green-pale); padding: .15rem .6rem;
+  border-radius: 6px; font-size: .78rem; color: var(--green-dark); font-weight: 700;
+}
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .row2          { grid-template-columns: 1fr; }
+  .formCard      { padding: 1.5rem 1rem; }
+  .calendarCard  { padding: 1.25rem 1rem; }
+  .successCard   { padding: 2rem 1rem; }
+}
