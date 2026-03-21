@@ -229,8 +229,8 @@
 .floatCard1 { top: 20px; right: -20px; animation: float 4s ease-in-out infinite .5s; }
 .floatCard2 { bottom: 20px; left: -20px; animation: float 4.5s ease-in-out infinite 1s; }
 .floatIcon  { font-size: 1.4rem; }
-.floatNum   { font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 900; color: #fff; }
-.floatLabel { font-size: .62rem; color: rgba(255,255,255,.65); margin-top: .1rem; }
+.floatNum   { font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 900; color: #10B981; }
+.floatLabel { font-size: .62rem; color: #10B981; margin-top: .1rem; }
 
 .doctorCard {
   background: rgba(255,255,255,.08);
