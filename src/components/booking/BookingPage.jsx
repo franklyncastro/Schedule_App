@@ -421,7 +421,7 @@ function FormStep({ day, slot, onBack, onSuccess }) {
         )}
 
         <div className="input-group">
-          <label className="input-label">Nombre completo *</label>
+          <label className="input-label">Nombre completo del paciente*</label>
           <input
             className={`input-field ${errors.nombre ? "error" : ""}`}
             placeholder="nombre completo"
@@ -471,7 +471,7 @@ function FormStep({ day, slot, onBack, onSuccess }) {
             )}
           </div>
           <div className="input-group">
-            <label className="input-label">Documento de identidad *</label>
+            <label className="input-label">Documento de identidad del tutor directo*</label>
             <input
               className={`input-field ${errors.cedula ? "error" : ""}`}
               placeholder="000-0000000-0"
