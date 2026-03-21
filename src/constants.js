@@ -24,7 +24,7 @@ export const SERVICES = [
   { emoji: "🤧",   name: "Bronquitis",                      desc: "Manejo de inflamación bronquial aguda y crónica." },
   { emoji: "🌸",   name: "Rinitis alérgica",                desc: "Control de síntomas nasales por alergia con plan sostenido." },
   { emoji: "🌬️",  name: "Asma",                            desc: "Diagnóstico temprano y manejo del asma pediátrica." },
-  { emoji: "🫁",   name: "Neumonía",                        desc: "Tratamiento y seguimiento con control radiológico." },
+  { emoji: "⚕️",   name: "Neumonía",                        desc: "Tratamiento y seguimiento con control radiológico." },
   { emoji: "🔄",   name: "Sibilancias recurrentes",         desc: "Evaluación de episodios frecuentes de sibilancias." },
   { emoji: "🦠",   name: "Infecciones respiratorias",       desc: "Estudio de infecciones recurrentes del tracto respiratorio." },
   { emoji: "🔍",   name: "Evaluación prequirúrgica",        desc: "Valoración neumológica completa previa a cirugías." },

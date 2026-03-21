@@ -63,7 +63,7 @@ export default function LandingPage() {
       <nav className={`${styles.nav} ${scrolled ? styles.navScrolled : ''}`}>
         <div className={styles.navInner}>
           <a href="#" className={styles.navLogo}>
-            <div className={styles.navLogoIcon}>🫁</div>
+            <div className={styles.navLogoIcon}>👨‍⚕️</div>
             <span className={styles.navLogoText}>MediCita</span>
           </a>
           <ul className={`${styles.navLinks} ${menuOpen ? styles.navOpen : ''}`}>
@@ -183,7 +183,7 @@ export default function LandingPage() {
         <div className={styles.sectionInner}>
           <SectionLabel>Quién soy</SectionLabel>
           <h2 className={styles.sectionTitle}>
-            Comprometida con la <span className={styles.accent}>salud infantil</span>
+            Comprometido con la <span className={styles.accent}>salud infantil</span>
           </h2>
           <div className={styles.aboutGrid}>
             <AboutText />
@@ -276,7 +276,7 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
-          <div className={styles.footerLogo}>🫁 MediCita</div>
+          <div className={styles.footerLogo}>👨‍⚕️ MediCita</div>
           <p className={styles.footerCopy}>© 2026 {DOCTOR.name} · {DOCTOR.specialty} · Santo Domingo, RD</p>
           <div className={styles.footerLinks}>
             <a href="#">Privacidad</a>
