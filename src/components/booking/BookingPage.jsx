@@ -1,56 +1,85 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { DOCTOR, SCHEDULE, SLOT_INTERVAL, DAYS_AHEAD, CONFIG } from '../../constants.js'
-import styles from './BookingPage.module.css'
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  DOCTOR,
+  SCHEDULE,
+  SLOT_INTERVAL,
+  DAYS_AHEAD,
+  CONFIG,
+} from "../../constants.js";
+import emailjs from "@emailjs/browser";
+import ReCAPTCHA from "react-google-recaptcha";
+import styles from "./BookingPage.module.css";
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-const DAY_NAMES_SHORT = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
-const DAY_NAMES_FULL  = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado']
-const MONTH_NAMES     = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
+const DAY_NAMES_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+const DAY_NAMES_FULL = [
+  "domingo",
+  "lunes",
+  "martes",
+  "miércoles",
+  "jueves",
+  "viernes",
+  "sábado",
+];
+const MONTH_NAMES = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+];
 
 function minutesToTime(m) {
-  const h24 = Math.floor(m / 60)
-  const min = (m % 60).toString().padStart(2, '0')
-  const ampm = h24 >= 12 ? 'PM' : 'AM'
-  const h12 = h24 % 12 === 0 ? 12 : h24 % 12
-  return `${h12}:${min} ${ampm}`
+  const h24 = Math.floor(m / 60);
+  const min = (m % 60).toString().padStart(2, "0");
+  const ampm = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${h12}:${min} ${ampm}`;
 }
 
 function getAvailableDays() {
-  const days = []
-  const now = new Date()
+  const days = [];
+  const now = new Date();
   for (let i = 0; i < DAYS_AHEAD; i++) {
-    const d = new Date(now)
-    d.setHours(0, 0, 0, 0)
-    d.setDate(d.getDate() + i)
-    if (!SCHEDULE[d.getDay()]) continue
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + i);
+    if (!SCHEDULE[d.getDay()]) continue;
     // Verificar que tenga al menos un slot disponible
-    const slots = getSlotsForDay(d, now)
-    if (slots.length > 0) days.push(d)
+    const slots = getSlotsForDay(d, now);
+    if (slots.length > 0) days.push(d);
   }
-  return days
+  return days;
 }
 
 function getSlotsForDay(date, now = new Date()) {
-  const dow = date.getDay()
-  const s = SCHEDULE[dow]
-  if (!s) return []
+  const dow = date.getDay();
+  const s = SCHEDULE[dow];
+  if (!s) return [];
 
-  const slots = []
+  const slots = [];
   for (let m = s.start; m < s.end; m += SLOT_INTERVAL) {
     // Si es hoy, filtrar horas que ya pasaron
-    const isToday = date.toDateString() === now.toDateString()
+    const isToday = date.toDateString() === now.toDateString();
     if (isToday) {
-      const nowMinutes = now.getHours() * 60 + now.getMinutes()
-      if (m <= nowMinutes) continue // saltar horas pasadas o en curso
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      if (m <= nowMinutes) continue; // saltar horas pasadas o en curso
     }
-    slots.push(m)
+    slots.push(m);
   }
-  return slots
+  return slots;
 }
 
 function formatDateLabel(date) {
-  return `${DAY_NAMES_FULL[date.getDay()]}, ${date.getDate()} de ${MONTH_NAMES[date.getMonth()]} de ${date.getFullYear()}`
+  return `${DAY_NAMES_FULL[date.getDay()]}, ${date.getDate()} de ${MONTH_NAMES[date.getMonth()]} de ${date.getFullYear()}`;
 }
 
 //  GOOGLE SHEETS  ────────────────────
@@ -58,79 +87,85 @@ async function checkDuplicate(cedula, nombre, email) {
   // Con no-cors no podemos leer la respuesta del GET
   // La validación real se hace en el servidor al guardar
   // Aquí solo verificamos localStorage para duplicados en la misma sesión
-  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
-  return citas.some(c =>
-    c.cedula === cedula ||
-    c.nombre.toLowerCase() === nombre.toLowerCase() ||
-    (email && c.email && c.email.toLowerCase() === email.toLowerCase())
-  )
+  const citas = JSON.parse(localStorage.getItem("citas_demo") || "[]");
+  return citas.some(
+    (c) =>
+      c.cedula === cedula ||
+      c.nombre.toLowerCase() === nombre.toLowerCase() ||
+      (email && c.email && c.email.toLowerCase() === email.toLowerCase()),
+  );
 }
 
 async function saveCita(cita) {
   // Guardar en localStorage
-  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
-  const nuevaCita = { ...cita, id: Date.now().toString(), status: 'pendiente' }
-  citas.push(nuevaCita)
-  localStorage.setItem('citas_demo', JSON.stringify(citas))
+  const citas = JSON.parse(localStorage.getItem("citas_demo") || "[]");
+  const nuevaCita = { ...cita, id: Date.now().toString(), status: "pendiente" };
+  citas.push(nuevaCita);
+  localStorage.setItem("citas_demo", JSON.stringify(citas));
 
   // Enviar a Google Sheets via URL params + no-cors
   if (CONFIG.SHEETS_SCRIPT_URL) {
     try {
-      const params = new URLSearchParams()
-      Object.entries(cita).forEach(([k, v]) => params.append(k, v ?? ''))
-      params.append('action', 'save')
+      const params = new URLSearchParams();
+      Object.entries(cita).forEach(([k, v]) => params.append(k, v ?? ""));
+      params.append("action", "save");
 
       await fetch(`${CONFIG.SHEETS_SCRIPT_URL}?${params.toString()}`, {
-        method: 'GET',
-        mode: 'no-cors',
-      })
+        method: "GET",
+        mode: "no-cors",
+      });
     } catch (e) {
-      console.error('Error guardando cita:', e)
+      console.error("Error guardando cita:", e);
     }
   }
 
-  return nuevaCita
+  return nuevaCita;
 }
 
 // ── PASOS ─────────────────────────────────────────────────────────────────────
-const STEP_CALENDAR = 'calendar'
-const STEP_FORM     = 'form'
-const STEP_SUCCESS  = 'success'
+const STEP_CALENDAR = "calendar";
+const STEP_FORM = "form";
+const STEP_SUCCESS = "success";
 
 // ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────────
 export default function BookingPage() {
-  const navigate = useNavigate()
-  const [step, setStep]           = useState(STEP_CALENDAR)
-  const [selectedDay, setSelectedDay] = useState(null)
-  const [selectedSlot, setSelectedSlot] = useState(null) // minutos
-  const [citaId, setCitaId]       = useState(null)
+  const navigate = useNavigate();
+  const [step, setStep] = useState(STEP_CALENDAR);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedSlot, setSelectedSlot] = useState(null); // minutos
+  const [citaId, setCitaId] = useState(null);
 
   // Grupos de días disponibles
-  const availableDays = getAvailableDays()
+  const availableDays = getAvailableDays();
 
   // Agrupar por semana para mostrar en bloques
-  const groupedDays = []
-  availableDays.forEach(d => {
-    const label = `${DAY_NAMES_FULL[d.getDay()]} - ${d.getDate()} de ${MONTH_NAMES[d.getMonth()]}`
-    groupedDays.push({ date: d, label })
-  })
+  const groupedDays = [];
+  availableDays.forEach((d) => {
+    const label = `${DAY_NAMES_FULL[d.getDay()]} - ${d.getDate()} de ${MONTH_NAMES[d.getMonth()]}`;
+    groupedDays.push({ date: d, label });
+  });
 
   const handleSelectSlot = (day, slot) => {
-    setSelectedDay(day)
-    setSelectedSlot(slot)
-    setStep(STEP_FORM)
-  }
+    setSelectedDay(day);
+    setSelectedSlot(slot);
+    setStep(STEP_FORM);
+  };
 
   const handleFormSuccess = (id) => {
-    setCitaId(id)
-    setStep(STEP_SUCCESS)
-  }
+    setCitaId(id);
+    setStep(STEP_SUCCESS);
+  };
 
   return (
     <div className={styles.page}>
       {/* HEADER */}
       <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => step === STEP_CALENDAR ? navigate('/') : setStep(STEP_CALENDAR)}>
+        <button
+          className={styles.backBtn}
+          onClick={() =>
+            step === STEP_CALENDAR ? navigate("/") : setStep(STEP_CALENDAR)
+          }
+        >
           ← Volver
         </button>
         <div className={styles.headerInfo}>
@@ -139,8 +174,10 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <div className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
-
+      <div
+        className="container"
+        style={{ paddingTop: "2rem", paddingBottom: "4rem" }}
+      >
         {step === STEP_CALENDAR && (
           <CalendarStep days={groupedDays} onSelectSlot={handleSelectSlot} />
         )}
@@ -157,25 +194,25 @@ export default function BookingPage() {
         {step === STEP_SUCCESS && (
           <SuccessStep citaId={citaId} day={selectedDay} slot={selectedSlot} />
         )}
-
       </div>
     </div>
-  )
+  );
 }
 
 // ── CALENDARIO ────────────────────────────────────────────────────────────────
 function CalendarStep({ days, onSelectSlot }) {
-  const [currentIdx, setCurrentIdx] = useState(0)
-  const current = days[currentIdx]
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const current = days[currentIdx];
 
-  if (!current) return (
-    <div className={styles.noSlots}>
-      <div className={styles.noSlotsIcon}>📅</div>
-      <p>No hay disponibilidad en los próximos {DAYS_AHEAD} días.</p>
-    </div>
-  )
+  if (!current)
+    return (
+      <div className={styles.noSlots}>
+        <div className={styles.noSlotsIcon}>📅</div>
+        <p>No hay disponibilidad en los próximos {DAYS_AHEAD} días.</p>
+      </div>
+    );
 
-  const slots = getSlotsForDay(current.date, new Date())
+  const slots = getSlotsForDay(current.date, new Date());
 
   return (
     <div className={styles.calendarCard}>
@@ -185,20 +222,24 @@ function CalendarStep({ days, onSelectSlot }) {
       <div className={styles.dayNav}>
         <button
           className={styles.dayNavBtn}
-          onClick={() => setCurrentIdx(i => Math.max(0, i - 1))}
+          onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
           disabled={currentIdx === 0}
-        >←</button>
+        >
+          ←
+        </button>
         <div className={styles.dayLabel}>{current.label}</div>
         <button
           className={styles.dayNavBtn}
-          onClick={() => setCurrentIdx(i => Math.min(days.length - 1, i + 1))}
+          onClick={() => setCurrentIdx((i) => Math.min(days.length - 1, i + 1))}
           disabled={currentIdx === days.length - 1}
-        >→</button>
+        >
+          →
+        </button>
       </div>
 
       {/* Slots de horas */}
       <div className={styles.slotsGrid}>
-        {slots.map(slot => (
+        {slots.map((slot) => (
           <button
             key={slot}
             className={styles.slotBtn}
@@ -210,196 +251,327 @@ function CalendarStep({ days, onSelectSlot }) {
       </div>
 
       <p className={styles.calendarNote}>
-        ℹ️ Los pacientes serán atendidos por orden de llegada según la fecha agendada.
+        ℹ️ Los pacientes serán atendidos por orden de llegada según la fecha
+        agendada.
       </p>
     </div>
-  )
+  );
 }
 
 // ── FORMULARIO ────────────────────────────────────────────────────────────────
 const INITIAL_FORM = {
-  nombre: '', telefono1: '', telefono2: '',
-  nacimiento: '', email: '', cedula: '',
-  responsable: '', observaciones: '',
+  nombre: "",
+  telefono1: "",
+  telefono2: "",
+  nacimiento: "",
+  email: "",
+  cedula: "",
+  responsable: "",
+  observaciones: "",
   aceptaTerminos: false,
-}
+};
 
 function FormStep({ day, slot, onBack, onSuccess }) {
-  const [form, setForm]       = useState(INITIAL_FORM)
-  const [errors, setErrors]   = useState({})
-  const [loading, setLoading] = useState(false)
-  const [captchaDone, setCaptchaDone] = useState(false)
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [captchaDone, setCaptchaDone] = useState(false);
 
-  const dateLabel = formatDateLabel(day)
-  const timeLabel = minutesToTime(slot)
+  const dateLabel = formatDateLabel(day);
+  const timeLabel = minutesToTime(slot);
 
-  const set = (field, value) => setForm(f => ({ ...f, [field]: value }))
+  const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
   const validate = () => {
-    const e = {}
-    if (!form.nombre.trim())    e.nombre    = 'El nombre es requerido'
-    if (!form.telefono1.trim()) e.telefono1 = 'El teléfono es requerido'
-    if (!form.nacimiento)       e.nacimiento = 'La fecha de nacimiento es requerida'
-    if (!form.cedula.trim())    e.cedula    = 'El documento es requerido'
-    if (!form.aceptaTerminos)   e.terminos  = 'Debes aceptar los términos'
-    if (!captchaDone)           e.captcha   = 'Confirma que no eres un robot'
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      e.email = 'Email inválido'
+    const e = {};
+
+    // Nombre
+    if (!form.nombre.trim()) e.nombre = "El nombre es requerido";
+
+    // Teléfono
+    if (!form.telefono1.trim()) e.telefono1 = "El teléfono es requerido";
+
+    // Fecha de nacimiento
+    if (!form.nacimiento) {
+      e.nacimiento = "La fecha de nacimiento es requerida";
+    } else {
+      const hoy = new Date();
+      const nacimiento = new Date(form.nacimiento);
+
+      if (nacimiento > hoy) {
+        e.nacimiento = "La fecha de nacimiento no puede ser futura";
+      } else {
+        const edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const cumplioEsteAnio =
+          hoy.getMonth() > nacimiento.getMonth() ||
+          (hoy.getMonth() === nacimiento.getMonth() &&
+            hoy.getDate() >= nacimiento.getDate());
+        const edadReal = cumplioEsteAnio ? edad : edad - 1;
+
+        if (edadReal > 18) {
+          e.nacimiento = "Este consultorio atiende pacientes de 0 a 18 años";
+        } else if (edadReal < 0) {
+          e.nacimiento = "Fecha de nacimiento inválida";
+        }
+      }
     }
-    return e
-  }
+
+    // Cédula
+    if (!form.cedula.trim()) {
+      e.cedula = "El documento es requerido";
+    } else {
+      const cedulaRegex = /^\d{3}-\d{7}-\d{1}$/;
+      if (!cedulaRegex.test(form.cedula)) {
+        e.cedula = "Formato inválido. Ejemplo: 001-1234567-8";
+      }
+    }
+
+    // Email opcional
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      e.email = "Email inválido";
+    }
+
+    // Términos
+    if (!form.aceptaTerminos) e.terminos = "Debes aceptar los términos";
+
+    // reCAPTCHA
+    if (!captchaDone) e.captcha = "Confirma que no eres un robot";
+
+    return e;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    const errs = validate()
-    if (Object.keys(errs).length > 0) { setErrors(errs); return }
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
 
-    setLoading(true)
+    setLoading(true);
     try {
       // Verificar duplicados
-      const isDup = await checkDuplicate(form.cedula, form.nombre, form.email)
+      const isDup = await checkDuplicate(form.cedula, form.nombre, form.email);
       if (isDup) {
-        setErrors({ general: 'Ya existe una cita registrada con este documento, nombre o email.' })
-        setLoading(false)
-        return
+        setErrors({
+          general:
+            "Ya existe una cita registrada con este documento, nombre o email.",
+        });
+        setLoading(false);
+        return;
       }
 
       // Guardar cita
       const cita = await saveCita({
         ...form,
-        fecha: day.toISOString().split('T')[0],
+        fecha: day.toISOString().split("T")[0],
         hora: timeLabel,
         doctor: DOCTOR.name,
         dateLabel,
         timeLabel,
-      })
+      });
 
-      // Simular envío de email (en producción: EmailJS)
-      console.log('📧 Email de confirmación enviado a:', form.email || 'sin email')
+      // Envío de email (en producción: EmailJS)
+      if (form.email && CONFIG.EMAILJS_SERVICE_ID) {
+        try {
+          await emailjs.send(
+            CONFIG.EMAILJS_SERVICE_ID,
+            CONFIG.EMAILJS_TEMPLATE_ID,
+            {
+              nombre: form.nombre,
+              fecha: dateLabel,
+              hora: timeLabel,
+              doctor: DOCTOR.name,
+              email_paciente: form.email,
+              confirm_url: `${CONFIG.SITE_URL}/confirmar/${cita.id}?action=confirm`,
+              cancel_url: `${CONFIG.SITE_URL}/confirmar/${cita.id}?action=cancel`,
+            },
+            CONFIG.EMAILJS_PUBLIC_KEY,
+          );
+          console.log("📧 Email enviado a:", form.email);
+        } catch (err) {
+          console.error("Error enviando email:", err);
+        }
+      }
 
-      onSuccess(cita.id)
+      onSuccess(cita.id);
     } catch (err) {
-      setErrors({ general: 'Error al procesar la cita. Intenta de nuevo.' })
+      setErrors({ general: "Error al procesar la cita. Intenta de nuevo." });
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   return (
     <div className={styles.formCard}>
       <div className={styles.citaHeader}>
         <p className={styles.citaLabel}>Cita para:</p>
-        <p className={styles.citaDate}>{dateLabel} a las {timeLabel}</p>
-        <button className={styles.changeDateBtn} onClick={onBack}>↩ Cambiar fecha</button>
+        <p className={styles.citaDate}>
+          {dateLabel} a las {timeLabel}
+        </p>
+        <button className={styles.changeDateBtn} onClick={onBack}>
+          ↩ Cambiar fecha
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} noValidate>
-
         {errors.general && (
           <div className={styles.errorBanner}>{errors.general}</div>
         )}
 
         <div className="input-group">
           <label className="input-label">Nombre completo *</label>
-          <input className={`input-field ${errors.nombre ? 'error' : ''}`}
+          <input
+            className={`input-field ${errors.nombre ? "error" : ""}`}
             placeholder="nombre completo"
-            value={form.nombre} onChange={e => set('nombre', e.target.value)} />
-          {errors.nombre && <span className="input-error">{errors.nombre}</span>}
+            value={form.nombre}
+            onChange={(e) => set("nombre", e.target.value)}
+          />
+          {errors.nombre && (
+            <span className="input-error">{errors.nombre}</span>
+          )}
         </div>
 
         <div className={styles.row2}>
           <div className="input-group">
             <label className="input-label">Teléfono principal *</label>
-            <input className={`input-field ${errors.telefono1 ? 'error' : ''}`}
+            <input
+              className={`input-field ${errors.telefono1 ? "error" : ""}`}
               placeholder="(00) 00000-0000"
-              value={form.telefono1} onChange={e => set('telefono1', e.target.value)} />
-            {errors.telefono1 && <span className="input-error">{errors.telefono1}</span>}
+              value={form.telefono1}
+              onChange={(e) => set("telefono1", e.target.value)}
+            />
+            {errors.telefono1 && (
+              <span className="input-error">{errors.telefono1}</span>
+            )}
           </div>
           <div className="input-group">
             <label className="input-label">Teléfono alternativo</label>
-            <input className="input-field"
+            <input
+              className="input-field"
               placeholder="(00) 00000-0000"
-              value={form.telefono2} onChange={e => set('telefono2', e.target.value)} />
+              value={form.telefono2}
+              onChange={(e) => set("telefono2", e.target.value)}
+            />
           </div>
         </div>
 
         <div className={styles.row2}>
           <div className="input-group">
             <label className="input-label">Fecha de nacimiento *</label>
-            <input type="date" className={`input-field ${errors.nacimiento ? 'error' : ''}`}
-              value={form.nacimiento} onChange={e => set('nacimiento', e.target.value)} />
-            {errors.nacimiento && <span className="input-error">{errors.nacimiento}</span>}
+            <input
+              type="date"
+              className={`input-field ${errors.nacimiento ? "error" : ""}`}
+              value={form.nacimiento}
+              onChange={(e) => set("nacimiento", e.target.value)}
+            />
+            {errors.nacimiento && (
+              <span className="input-error">{errors.nacimiento}</span>
+            )}
           </div>
           <div className="input-group">
             <label className="input-label">Documento de identidad *</label>
-            <input className={`input-field ${errors.cedula ? 'error' : ''}`}
-              placeholder="número de cédula / pasaporte"
-              value={form.cedula} onChange={e => set('cedula', e.target.value)} />
-            {errors.cedula && <span className="input-error">{errors.cedula}</span>}
+            <input
+              className={`input-field ${errors.cedula ? "error" : ""}`}
+              placeholder="000-0000000-0"
+              value={form.cedula}
+              maxLength={13}
+              onChange={(e) => {
+                // Auto-formato mientras escribe
+                let val = e.target.value.replace(/\D/g, ""); // solo números
+                if (val.length > 3) val = val.slice(0, 3) + "-" + val.slice(3);
+                if (val.length > 11)
+                  val = val.slice(0, 11) + "-" + val.slice(11);
+                set("cedula", val);
+              }}
+            />
+            {errors.cedula && (
+              <span className="input-error">{errors.cedula}</span>
+            )}
           </div>
         </div>
 
         <div className="input-group">
           <label className="input-label">Email (opcional)</label>
-          <input type="email" className={`input-field ${errors.email ? 'error' : ''}`}
+          <input
+            type="email"
+            className={`input-field ${errors.email ? "error" : ""}`}
             placeholder="(opcional) e-mail"
-            value={form.email} onChange={e => set('email', e.target.value)} />
+            value={form.email}
+            onChange={(e) => set("email", e.target.value)}
+          />
           {errors.email && <span className="input-error">{errors.email}</span>}
         </div>
 
         <div className="input-group">
           <label className="input-label">Persona responsable (opcional)</label>
-          <input className="input-field"
+          <input
+            className="input-field"
             placeholder="(opcional) persona responsable"
-            value={form.responsable} onChange={e => set('responsable', e.target.value)} />
+            value={form.responsable}
+            onChange={(e) => set("responsable", e.target.value)}
+          />
         </div>
 
         <div className="input-group">
           <label className="input-label">Observaciones (opcional)</label>
-          <textarea className="input-field" rows={3}
+          <textarea
+            className="input-field"
+            rows={3}
             placeholder="(opcional) observaciones"
-            value={form.observaciones} onChange={e => set('observaciones', e.target.value)}
-            style={{ resize: 'none' }} />
+            value={form.observaciones}
+            onChange={(e) => set("observaciones", e.target.value)}
+            style={{ resize: "none" }}
+          />
         </div>
 
         {/* TÉRMINOS */}
         <div className={styles.checkRow}>
-          <input type="checkbox" id="terminos"
+          <input
+            type="checkbox"
+            id="terminos"
             checked={form.aceptaTerminos}
-            onChange={e => set('aceptaTerminos', e.target.checked)} />
+            onChange={(e) => set("aceptaTerminos", e.target.checked)}
+          />
           <label htmlFor="terminos" className={styles.checkLabel}>
-            Afirmo que he leído y acepto las{' '}
-            <a href="#" className={styles.termLink}>condiciones de uso</a>
+            Afirmo que he leído y acepto las{" "}
+            <a href="#" className={styles.termLink}>
+              condiciones de uso
+            </a>
           </label>
         </div>
-        {errors.terminos && <span className="input-error">{errors.terminos}</span>}
+        {errors.terminos && (
+          <span className="input-error">{errors.terminos}</span>
+        )}
 
         {/* reCAPTCHA SIMULADO */}
-        <div className={styles.captchaBox}>
-          <input type="checkbox" id="captcha"
-            checked={captchaDone} onChange={e => setCaptchaDone(e.target.checked)} />
-          <label htmlFor="captcha" className={styles.captchaLabel}>No soy un robot</label>
-          <div className={styles.captchaBadge}>
-            <span style={{ fontSize: '.7rem', color: '#555' }}>reCAPTCHA</span>
-          </div>
+    
+        <div style={{ margin: ".75rem 0" }}>
+          <ReCAPTCHA
+            sitekey={CONFIG.RECAPTCHA_SITE_KEY}
+            onChange={(token) => setCaptchaDone(!!token)}
+            onExpired={() => setCaptchaDone(false)}
+          />
         </div>
-        {errors.captcha && <span className="input-error">{errors.captcha}</span>}
 
-        <div style={{ marginTop: '1.5rem' }}>
+        {errors.captcha && (
+          <span className="input-error">{errors.captcha}</span>
+        )}
+
+        <div style={{ marginTop: "1.5rem" }}>
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? '⏳ Procesando...' : '📅 Solicitar Cita'}
+            {loading ? "⏳ Procesando..." : "📅 Solicitar Cita"}
           </button>
         </div>
-
       </form>
     </div>
-  )
+  );
 }
 
 // ── ÉXITO ─────────────────────────────────────────────────────────────────────
 function SuccessStep({ citaId, day, slot }) {
-  const navigate = useNavigate()
-  const dateLabel = day ? formatDateLabel(day) : ''
-  const timeLabel = slot !== null ? minutesToTime(slot) : ''
+  const navigate = useNavigate();
+  const dateLabel = day ? formatDateLabel(day) : "";
+  const timeLabel = slot !== null ? minutesToTime(slot) : "";
 
   return (
     <div className={styles.successCard}>
@@ -410,18 +582,28 @@ function SuccessStep({ citaId, day, slot }) {
       </p>
       <div className={styles.successMsg}>
         <p>Se enviará un correo electrónico para confirmar su cita.</p>
-        <p>Una vez reciba el correo, por favor confirme si asistirá haciendo clic en el botón <strong>"Sí, asistiré"</strong>.</p>
+        <p>
+          Una vez reciba el correo, por favor confirme si asistirá haciendo clic
+          en el botón <strong>"Sí, asistiré"</strong>.
+        </p>
         <p className={styles.successNote}>
-          📋 Los pacientes serán atendidos en <strong>orden de llegada</strong> según la fecha agendada.
-          Por favor llegue unos minutos antes de la hora seleccionada de ser posible.
+          📋 Los pacientes serán atendidos en <strong>orden de llegada</strong>{" "}
+          según la fecha agendada. Por favor llegue unos minutos antes de la
+          hora seleccionada de ser posible.
         </p>
       </div>
       {citaId && (
-        <p className={styles.citaId}>Código de cita: <code>#{citaId}</code></p>
+        <p className={styles.citaId}>
+          Código de cita: <code>#{citaId}</code>
+        </p>
       )}
-      <button className="btn-secondary" onClick={() => navigate('/')} style={{ marginTop: '1.5rem', width: '100%' }}>
+      <button
+        className="btn-secondary"
+        onClick={() => navigate("/")}
+        style={{ marginTop: "1.5rem", width: "100%" }}
+      >
         ← Volver al inicio
       </button>
     </div>
-  )
+  );
 }

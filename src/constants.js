@@ -60,13 +60,13 @@ export const CONFIG = {
   SHEET_ID:"1X2Ml7vu7hJ-jg_uBYeGgFfl9xxh33QDSzXrTJDl7UO0", // ID del Google Sheet
 
   // EmailJS
-  EMAILJS_SERVICE_ID:  "",
-  EMAILJS_TEMPLATE_ID: "",
-  EMAILJS_PUBLIC_KEY:  "",
+  EMAILJS_SERVICE_ID:  "service_1choke8",
+  EMAILJS_TEMPLATE_ID: "template_m36scid",
+  EMAILJS_PUBLIC_KEY:  "qjAVEiVLvrInhKDLI",
 
   // reCAPTCHA
-  RECAPTCHA_SITE_KEY: "", // "6LeXXXXXXXXXXXXXXXXXXX"
+  RECAPTCHA_SITE_KEY: "6LcQjpIsAAAAABbOY9aDcE81EKGHf_ZfF2nxMaxc", // "6LeXXXXXXXXXXXXXXXXXXX"
 
   // URL base del sitio (para links de confirmación en emails)
-  SITE_URL: "http://localhost:5173",
+  SITE_URL: "https://medicitamendoza.vercel.app",
 }
