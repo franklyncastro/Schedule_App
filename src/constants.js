@@ -56,8 +56,8 @@ export const PAYMENT   = ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito
 // ── CONFIGURACIÓN APIs (llenar cuando estén listas) ──────────────────────────
 export const CONFIG = {
   // Google Sheets
-  SHEETS_SCRIPT_URL: "", // URL del Apps Script Web App
-  SHEET_ID:          "", // ID del Google Sheet
+  SHEETS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxuhkhLeOdo3WlgNsaFGAFjyLeH2BuxTEuKnijc_-CEE9I57mB34HJejHrGuFulWBc9RQ/exec", // URL del Apps Script Web App
+  SHEET_ID:"1X2Ml7vu7hJ-jg_uBYeGgFfl9xxh33QDSzXrTJDl7UO0", // ID del Google Sheet
 
   // EmailJS
   EMAILJS_SERVICE_ID:  "",

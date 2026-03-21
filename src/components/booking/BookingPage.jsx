@@ -53,36 +53,43 @@ function formatDateLabel(date) {
   return `${DAY_NAMES_FULL[date.getDay()]}, ${date.getDate()} de ${MONTH_NAMES[date.getMonth()]} de ${date.getFullYear()}`
 }
 
-// ── SIMULACIÓN GOOGLE SHEETS (reemplazar con llamada real) ────────────────────
+//  GOOGLE SHEETS  ────────────────────
 async function checkDuplicate(cedula, nombre, email) {
-  // Con datos simulados, siempre devuelve false (no hay duplicado)
-  // En producción: llamar al Apps Script que lee el Google Sheet
-  if (CONFIG.SHEETS_SCRIPT_URL) {
-    try {
-      const res = await fetch(`${CONFIG.SHEETS_SCRIPT_URL}?action=check&cedula=${cedula}&nombre=${encodeURIComponent(nombre)}&email=${encodeURIComponent(email)}`)
-      const data = await res.json()
-      return data.duplicate
-    } catch { return false }
-  }
-  return false
+  // Con no-cors no podemos leer la respuesta del GET
+  // La validación real se hace en el servidor al guardar
+  // Aquí solo verificamos localStorage para duplicados en la misma sesión
+  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
+  return citas.some(c =>
+    c.cedula === cedula ||
+    c.nombre.toLowerCase() === nombre.toLowerCase() ||
+    (email && c.email && c.email.toLowerCase() === email.toLowerCase())
+  )
 }
 
 async function saveCita(cita) {
-  // En producción: guardar en Google Sheets via Apps Script
+  // Guardar en localStorage
+  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
+  const nuevaCita = { ...cita, id: Date.now().toString(), status: 'pendiente' }
+  citas.push(nuevaCita)
+  localStorage.setItem('citas_demo', JSON.stringify(citas))
+
+  // Enviar a Google Sheets via URL params + no-cors
   if (CONFIG.SHEETS_SCRIPT_URL) {
     try {
-      await fetch(CONFIG.SHEETS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save', ...cita }),
+      const params = new URLSearchParams()
+      Object.entries(cita).forEach(([k, v]) => params.append(k, v ?? ''))
+      params.append('action', 'save')
+
+      await fetch(`${CONFIG.SHEETS_SCRIPT_URL}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors',
       })
-    } catch (e) { console.error('Error guardando cita:', e) }
+    } catch (e) {
+      console.error('Error guardando cita:', e)
+    }
   }
-  // Guardar en localStorage como simulación
-  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
-  citas.push({ ...cita, id: Date.now().toString(), status: 'pendiente' })
-  localStorage.setItem('citas_demo', JSON.stringify(citas))
-  return citas[citas.length - 1]
+
+  return nuevaCita
 }
 
 // ── PASOS ─────────────────────────────────────────────────────────────────────
