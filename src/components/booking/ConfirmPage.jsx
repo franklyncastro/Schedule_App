@@ -46,10 +46,13 @@ export default function ConfirmPage() {
           }
 
           // Confirmada o cancelada exitosamente
+          // Confirmada o cancelada exitosamente
           if (data.ok) {
-            setCita(
-              (prev) => prev || { nombre: "", dateLabel: "", timeLabel: "" },
-            );
+            setCita({
+              nombre: data.nombre || "",
+              dateLabel: data.fecha || "",
+              timeLabel: data.hora || "",
+            });
             setStatus(action === "confirm" ? "confirmed" : "cancelled");
             return;
           }
