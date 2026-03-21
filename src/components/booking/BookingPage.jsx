@@ -97,29 +97,31 @@ async function checkDuplicate(cedula, nombre, email) {
 }
 
 async function saveCita(cita) {
-  // Guardar en localStorage
-  const citas = JSON.parse(localStorage.getItem("citas_demo") || "[]");
-  const nuevaCita = { ...cita, id: Date.now().toString(), status: "pendiente" };
-  citas.push(nuevaCita);
-  localStorage.setItem("citas_demo", JSON.stringify(citas));
+  const id = Date.now().toString()
 
-  // Enviar a Google Sheets via URL params + no-cors
+  // Guardar en localStorage
+  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
+  const nuevaCita = { ...cita, id, status: 'pendiente' }
+  citas.push(nuevaCita)
+  localStorage.setItem('citas_demo', JSON.stringify(citas))
+
+  // Enviar a Google Sheets con el ID incluido
   if (CONFIG.SHEETS_SCRIPT_URL) {
     try {
-      const params = new URLSearchParams();
-      Object.entries(cita).forEach(([k, v]) => params.append(k, v ?? ""));
-      params.append("action", "save");
-
-      await fetch(`${CONFIG.SHEETS_SCRIPT_URL}?${params.toString()}`, {
-        method: "GET",
-        mode: "no-cors",
-      });
+      const params = new URLSearchParams()
+      Object.entries({ ...cita, id }).forEach(([k, v]) => params.append(k, v ?? ''))
+      await fetch(`${CONFIG.SHEETS_SCRIPT_URL}`, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      })
     } catch (e) {
-      console.error("Error guardando cita:", e);
+      console.error('Error guardando cita:', e)
     }
   }
 
-  return nuevaCita;
+  return nuevaCita
 }
 
 // ── PASOS ─────────────────────────────────────────────────────────────────────
