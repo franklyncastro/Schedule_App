@@ -12,7 +12,6 @@ import ReCAPTCHA from "react-google-recaptcha";
 import styles from "./BookingPage.module.css";
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
-const DAY_NAMES_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 const DAY_NAMES_FULL = [
   "domingo",
   "lunes",
@@ -97,16 +96,15 @@ function formatDateLabel(date) {
 }
 
 //  GOOGLE SHEETS  ────────────────────
-async function checkDuplicate(cedula, nombre, email) {
-  // Con no-cors no podemos leer la respuesta del GET
-  // La validación real se hace en el servidor al guardar
-  // Aquí solo verificamos localStorage para duplicados en la misma sesión
+async function checkDuplicate(cedula, fecha, hora) {
+  // Solo verificar si ya existe una cita con la misma cédula, fecha y hora
   const citas = JSON.parse(localStorage.getItem("citas_demo") || "[]");
   return citas.some(
     (c) =>
-      c.cedula === cedula ||
-      c.nombre.toLowerCase() === nombre.toLowerCase() ||
-      (email && c.email && c.email.toLowerCase() === email.toLowerCase()),
+      c.cedula === cedula &&
+      c.fecha === fecha &&
+      c.hora === hora &&
+      c.status !== "cancelada",
   );
 }
 
@@ -417,11 +415,14 @@ function FormStep({ day, slot, onBack, onSuccess }) {
     setLoading(true);
     try {
       // Verificar duplicados
-      const isDup = await checkDuplicate(form.cedula, form.nombre, form.email);
+      const isDup = await checkDuplicate(
+        form.cedula,
+        day.toISOString().split("T")[0],
+        timeLabel,
+      );
       if (isDup) {
         setErrors({
-          general:
-            "Ya existe una cita registrada con este documento, nombre o email.",
+          general: "Ya tienes una cita registrada para esta fecha y hora.",
         });
         setLoading(false);
         return;
