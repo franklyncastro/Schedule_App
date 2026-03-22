@@ -14,8 +14,8 @@ export default function ConfirmPage() {
 
   function formatDateDisplay(iso) {
     if (!iso) return "—";
-    // Manejar tanto ISO completo como solo fecha YYYY-MM-DD
-    const date = new Date(iso);
+    const clean = iso.length > 10 ? iso.slice(0, 10) : iso;
+    const [y, m, d] = clean.split("-");
     const months = [
       "enero",
       "febrero",
@@ -30,7 +30,7 @@ export default function ConfirmPage() {
       "noviembre",
       "diciembre",
     ];
-    return `${months[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
+    return `${d} de ${months[parseInt(m) - 1]} de ${y}`;
   }
 
   useEffect(() => {
@@ -157,9 +157,7 @@ export default function ConfirmPage() {
               <p>
                 <strong>Paciente:</strong> {cita.nombre}
               </p>
-              <p>
-                <strong>Fecha:</strong> {formatDateDisplay(cita.dateLabel)}
-              </p>
+              <p><strong>Fecha:</strong> {formatDateDisplay(cita.dateLabel)}</p>
               <p>
                 <strong>Hora:</strong> {cita.timeLabel}
               </p>

@@ -7,7 +7,8 @@ export const DOCTOR = {
   whatsapp: "18095550192",
   instagram: "@dr.carlosmendoza",
   email: "citas@drmendoza.com",
-  about: "Especialista en neumología pediátrica con más de 10 años de experiencia en el diagnóstico, tratamiento y prevención de enfermedades respiratorias y pulmonares en niños, desde el nacimiento hasta los 18 años.",
+  about:
+    "Especialista en neumología pediátrica con más de 10 años de experiencia en el diagnóstico, tratamiento y prevención de enfermedades respiratorias y pulmonares en niños, desde el nacimiento hasta los 18 años.",
   address: {
     street: "Av. Abraham Lincoln #856",
     area: "Piantini, Santo Domingo",
@@ -16,57 +17,89 @@ export const DOCTOR = {
     lat: 18.4861,
     lng: -69.9312,
   },
-}
+};
 
 // ── SERVICIOS ────────────────────────────────────────────────────────────────
 export const SERVICES = [
-  { emoji: "😮‍💨", name: "Tos crónica",                    desc: "Evaluación y tratamiento de tos persistente mayor a 4 semanas." },
-  { emoji: "🤧",   name: "Bronquitis",                      desc: "Manejo de inflamación bronquial aguda y crónica." },
-  { emoji: "🌸",   name: "Rinitis alérgica",                desc: "Control de síntomas nasales por alergia con plan sostenido." },
-  { emoji: "🌬️",  name: "Asma",                            desc: "Diagnóstico temprano y manejo del asma pediátrica." },
-  { emoji: "⚕️",   name: "Neumonía",                        desc: "Tratamiento y seguimiento con control radiológico." },
-  { emoji: "🔄",   name: "Sibilancias recurrentes",         desc: "Evaluación de episodios frecuentes de sibilancias." },
-  { emoji: "🦠",   name: "Infecciones respiratorias",       desc: "Estudio de infecciones recurrentes del tracto respiratorio." },
-  { emoji: "🔍",   name: "Evaluación prequirúrgica",        desc: "Valoración neumológica completa previa a cirugías." },
-  { emoji: "💤",   name: "Apnea del sueño",                 desc: "Diagnóstico y manejo de trastornos respiratorios nocturnos." },
-]
+  {
+    emoji: "😮‍💨",
+    name: "Tos crónica",
+    desc: "Evaluación y tratamiento de tos persistente mayor a 4 semanas.",
+  },
+  {
+    emoji: "🤧",
+    name: "Bronquitis",
+    desc: "Manejo de inflamación bronquial aguda y crónica.",
+  },
+  {
+    emoji: "🌸",
+    name: "Rinitis alérgica",
+    desc: "Control de síntomas nasales por alergia con plan sostenido.",
+  },
+  {
+    emoji: "🌬️",
+    name: "Asma",
+    desc: "Diagnóstico temprano y manejo del asma pediátrica.",
+  },
+  {
+    emoji: "⚕️",
+    name: "Neumonía",
+    desc: "Tratamiento y seguimiento con control radiológico.",
+  },
+  {
+    emoji: "🔄",
+    name: "Sibilancias recurrentes",
+    desc: "Evaluación de episodios frecuentes de sibilancias.",
+  },
+  {
+    emoji: "🦠",
+    name: "Infecciones respiratorias",
+    desc: "Estudio de infecciones recurrentes del tracto respiratorio.",
+  },
+  {
+    emoji: "🔍",
+    name: "Evaluación prequirúrgica",
+    desc: "Valoración neumológica completa previa a cirugías.",
+  },
+  {
+    emoji: "💤",
+    name: "Apnea del sueño",
+    desc: "Diagnóstico y manejo de trastornos respiratorios nocturnos.",
+  },
+];
 
 // ── HORARIOS ─────────────────────────────────────────────────────────────────
 // start y end en minutos desde medianoche. null = no disponible
 export const SCHEDULE = {
-  0: null,                          // Domingo
-  1: { start: 8*60+30, end: 18*60 }, // Lunes     8:30–18:00
-  2: null,                          // Martes
-  3: null,                          // Miércoles
-  4: { start: 8*60,    end: 11*60+30 }, // Jueves  8:00–11:30
-  5: { start: 9*60,    end: 13*60 },    // Viernes 9:00–13:00
-  6: null,                          // Sábado
-}
+  0: null, // Domingo
+  1: { start: 8 * 60 + 30, end: 18 * 60 }, // Lunes     8:30–18:00
+  2: null, // Martes
+  3: null, // Miércoles
+  4: { start: 8 * 60, end: 11 * 60 + 30 }, // Jueves  8:00–11:30
+  5: { start: 9 * 60, end: 13 * 60 }, // Viernes 9:00–13:00
+  6: null, // Sábado
+};
 
 // Intervalo entre citas en minutos
-export const SLOT_INTERVAL = 30
+export const SLOT_INTERVAL = 30;
 
 // Días hacia adelante que se muestran en el calendario
-export const DAYS_AHEAD = 30
+export const DAYS_AHEAD = 30;
 
 // ── SEGUROS Y PAGO ───────────────────────────────────────────────────────────
-export const INSURANCE = "Se aceptan todos los seguros médicos."
-export const PAYMENT   = ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito"]
+export const INSURANCE = "Se aceptan todos los seguros médicos.";
+export const PAYMENT = ["Efectivo", "Tarjeta de crédito", "Tarjeta de débito"];
 
 // ── CONFIGURACIÓN APIs (llenar cuando estén listas) ──────────────────────────
 export const CONFIG = {
-  // Google Sheets
-  SHEETS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxuhkhLeOdo3WlgNsaFGAFjyLeH2BuxTEuKnijc_-CEE9I57mB34HJejHrGuFulWBc9RQ/exec", // URL del Apps Script Web App
-  SHEET_ID:"1X2Ml7vu7hJ-jg_uBYeGgFfl9xxh33QDSzXrTJDl7UO0", // ID del Google Sheet
+  SHEETS_SCRIPT_URL: import.meta.env.VITE_SHEETS_SCRIPT_URL || "",
+  SHEET_ID: import.meta.env.VITE_SHEET_ID || "",
 
-  // EmailJS
-  EMAILJS_SERVICE_ID:  "service_1choke8",
-  EMAILJS_TEMPLATE_ID: "template_m36scid",
-  EMAILJS_PUBLIC_KEY:  "qjAVEiVLvrInhKDLI",
+  EMAILJS_SERVICE_ID: import.meta.env.VITE_EMAILJS_SERVICE_ID || "",
+  EMAILJS_TEMPLATE_ID: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "",
+  EMAILJS_PUBLIC_KEY: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "",
 
-  // reCAPTCHA
-  RECAPTCHA_SITE_KEY: "6LcQjpIsAAAAABbOY9aDcE81EKGHf_ZfF2nxMaxc", 
+  RECAPTCHA_SITE_KEY: import.meta.env.VITE_RECAPTCHA_SITE_KEY || "",
 
-  // URL base del sitio (para links de confirmación en emails)
-  SITE_URL: "https://medicitamendoza.vercel.app",
-}
+  SITE_URL: import.meta.env.VITE_SITE_URL || "",
+};

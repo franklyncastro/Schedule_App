@@ -293,7 +293,7 @@ function CalendarStep({ days, onSelectSlot }) {
               >
                 {timeLabel}
                 {isOccupied && (
-                  <span className={styles.slotOccupiedLabel}>Ocupado</span>
+                  <span className={styles.slotOccupiedLabel}> Ocupado</span>
                 )}
               </button>
             );
@@ -339,8 +339,23 @@ function FormStep({ day, slot, onBack, onSuccess }) {
     // Nombre
     if (!form.nombre.trim()) e.nombre = "El nombre es requerido";
 
-    // Teléfono
-    if (!form.telefono1.trim()) e.telefono1 = "El teléfono es requerido";
+    // Teléfono principal
+    if (!form.telefono1.trim()) {
+      e.telefono1 = "El teléfono es requerido";
+    } else {
+      const telRegex = /^(809|829|849)-\d{3}-\d{4}$/;
+      if (!telRegex.test(form.telefono1)) {
+        e.telefono1 = "Formato inválido. Ejemplo: 809-000-0000";
+      }
+    }
+
+    // Teléfono alternativo — solo valida si tiene algo escrito
+    if (form.telefono2.trim()) {
+      const telRegex = /^(809|829|849)-\d{3}-\d{4}$/;
+      if (!telRegex.test(form.telefono2)) {
+        e.telefono2 = "Formato inválido. Ejemplo: 829-000-0000";
+      }
+    }
 
     // Fecha de nacimiento
     if (!form.nacimiento) {
@@ -487,9 +502,15 @@ function FormStep({ day, slot, onBack, onSuccess }) {
             <label className="input-label">Teléfono principal *</label>
             <input
               className={`input-field ${errors.telefono1 ? "error" : ""}`}
-              placeholder="(00) 00000-0000"
+              placeholder="809-000-0000"
               value={form.telefono1}
-              onChange={(e) => set("telefono1", e.target.value)}
+              maxLength={12}
+              onChange={(e) => {
+                let val = e.target.value.replace(/\D/g, "");
+                if (val.length > 3) val = val.slice(0, 3) + "-" + val.slice(3);
+                if (val.length > 7) val = val.slice(0, 7) + "-" + val.slice(7);
+                set("telefono1", val);
+              }}
             />
             {errors.telefono1 && (
               <span className="input-error">{errors.telefono1}</span>
@@ -498,11 +519,20 @@ function FormStep({ day, slot, onBack, onSuccess }) {
           <div className="input-group">
             <label className="input-label">Teléfono alternativo</label>
             <input
-              className="input-field"
-              placeholder="(00) 00000-0000"
+              className={`input-field ${errors.telefono2 ? "error" : ""}`}
+              placeholder="829-000-0000"
               value={form.telefono2}
-              onChange={(e) => set("telefono2", e.target.value)}
+              maxLength={12}
+              onChange={(e) => {
+                let val = e.target.value.replace(/\D/g, "");
+                if (val.length > 3) val = val.slice(0, 3) + "-" + val.slice(3);
+                if (val.length > 7) val = val.slice(0, 7) + "-" + val.slice(7);
+                set("telefono2", val);
+              }}
             />
+            {errors.telefono2 && (
+              <span className="input-error">{errors.telefono2}</span>
+            )}
           </div>
         </div>
 
