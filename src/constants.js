@@ -65,7 +65,7 @@ export const CONFIG = {
   EMAILJS_PUBLIC_KEY:  "qjAVEiVLvrInhKDLI",
 
   // reCAPTCHA
-  RECAPTCHA_SITE_KEY: "6LcQjpIsAAAAABbOY9aDcE81EKGHf_ZfF2nxMaxc", // "6LeXXXXXXXXXXXXXXXXXXX"
+  RECAPTCHA_SITE_KEY: "6LcQjpIsAAAAABbOY9aDcE81EKGHf_ZfF2nxMaxc", 
 
   // URL base del sitio (para links de confirmación en emails)
   SITE_URL: "https://medicitamendoza.vercel.app",

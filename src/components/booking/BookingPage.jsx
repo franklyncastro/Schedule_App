@@ -60,6 +60,20 @@ function getAvailableDays() {
   return days;
 }
 
+async function getOccupiedSlots(date) {
+  if (!CONFIG.SHEETS_SCRIPT_URL) return [];
+  try {
+    const fecha = date.toISOString().split("T")[0];
+    const res = await fetch(
+      `${CONFIG.SHEETS_SCRIPT_URL}?action=slots&fecha=${fecha}`,
+    );
+    const data = await res.json();
+    return data.ocupados || [];
+  } catch {
+    return [];
+  }
+}
+
 function getSlotsForDay(date, now = new Date()) {
   const dow = date.getDay();
   const s = SCHEDULE[dow];
@@ -97,31 +111,33 @@ async function checkDuplicate(cedula, nombre, email) {
 }
 
 async function saveCita(cita) {
-  const id = Date.now().toString()
+  const id = Date.now().toString();
 
   // Guardar en localStorage
-  const citas = JSON.parse(localStorage.getItem('citas_demo') || '[]')
-  const nuevaCita = { ...cita, id, status: 'pendiente' }
-  citas.push(nuevaCita)
-  localStorage.setItem('citas_demo', JSON.stringify(citas))
+  const citas = JSON.parse(localStorage.getItem("citas_demo") || "[]");
+  const nuevaCita = { ...cita, id, status: "pendiente" };
+  citas.push(nuevaCita);
+  localStorage.setItem("citas_demo", JSON.stringify(citas));
 
   // Enviar a Google Sheets con el ID incluido
   if (CONFIG.SHEETS_SCRIPT_URL) {
     try {
-      const params = new URLSearchParams()
-      Object.entries({ ...cita, id }).forEach(([k, v]) => params.append(k, v ?? ''))
+      const params = new URLSearchParams();
+      Object.entries({ ...cita, id }).forEach(([k, v]) =>
+        params.append(k, v ?? ""),
+      );
       await fetch(`${CONFIG.SHEETS_SCRIPT_URL}`, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: params.toString(),
-      })
+      });
     } catch (e) {
-      console.error('Error guardando cita:', e)
+      console.error("Error guardando cita:", e);
     }
   }
 
-  return nuevaCita
+  return nuevaCita;
 }
 
 // ── PASOS ─────────────────────────────────────────────────────────────────────
@@ -204,7 +220,18 @@ export default function BookingPage() {
 // ── CALENDARIO ────────────────────────────────────────────────────────────────
 function CalendarStep({ days, onSelectSlot }) {
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [ocupados, setOcupados] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const current = days[currentIdx];
+
+  useEffect(() => {
+    if (!current) return;
+    setLoadingSlots(true);
+    getOccupiedSlots(current.date).then((data) => {
+      setOcupados(data);
+      setLoadingSlots(false);
+    });
+  }, [currentIdx]);
 
   if (!current)
     return (
@@ -240,17 +267,39 @@ function CalendarStep({ days, onSelectSlot }) {
       </div>
 
       {/* Slots de horas */}
-      <div className={styles.slotsGrid}>
-        {slots.map((slot) => (
-          <button
-            key={slot}
-            className={styles.slotBtn}
-            onClick={() => onSelectSlot(current.date, slot)}
-          >
-            {minutesToTime(slot)}
-          </button>
-        ))}
-      </div>
+      {/* Slots de horas */}
+      {loadingSlots ? (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "2rem",
+            color: "var(--text-mid)",
+          }}
+        >
+          ⏳ Verificando disponibilidad...
+        </div>
+      ) : (
+        <div className={styles.slotsGrid}>
+          {slots.map((slot) => {
+            const timeLabel = minutesToTime(slot);
+            const isOccupied = ocupados.includes(timeLabel);
+            return (
+              <button
+                key={slot}
+                className={`${styles.slotBtn} ${isOccupied ? styles.slotOccupied : ""}`}
+                onClick={() => !isOccupied && onSelectSlot(current.date, slot)}
+                disabled={isOccupied}
+                title={isOccupied ? "Hora no disponible" : ""}
+              >
+                {timeLabel}
+                {isOccupied && (
+                  <span className={styles.slotOccupiedLabel}>Ocupado</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <p className={styles.calendarNote}>
         ℹ️ Los pacientes serán atendidos por orden de llegada según la fecha
@@ -471,7 +520,9 @@ function FormStep({ day, slot, onBack, onSuccess }) {
             )}
           </div>
           <div className="input-group">
-            <label className="input-label">Documento de identidad del tutor directo*</label>
+            <label className="input-label">
+              Documento de identidad del tutor directo*
+            </label>
             <input
               className={`input-field ${errors.cedula ? "error" : ""}`}
               placeholder="000-0000000-0"
@@ -546,7 +597,7 @@ function FormStep({ day, slot, onBack, onSuccess }) {
         )}
 
         {/* reCAPTCHA SIMULADO */}
-    
+
         <div style={{ margin: ".75rem 0" }}>
           <ReCAPTCHA
             sitekey={CONFIG.RECAPTCHA_SITE_KEY}

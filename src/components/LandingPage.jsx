@@ -116,13 +116,13 @@ export default function LandingPage() {
             </div>
             <div className={styles.heroContact}>
               <a href={`https://wa.me/${DOCTOR.whatsapp}`} target="_blank" rel="noreferrer" className={styles.heroContactItem}>
-                <span>💬</span> WhatsApp
+                <span><i class="fa-brands fa-whatsapp"></i> </span> WhatsApp
               </a>
               <a href={`tel:${DOCTOR.phone}`} className={styles.heroContactItem}>
-                <span>📞</span> {DOCTOR.phone}
+                <span><i class="fa-solid fa-phone"></i></span> {DOCTOR.phone}
               </a>
               <a href={`https://instagram.com/${DOCTOR.instagram.replace('@','')}`} target="_blank" rel="noreferrer" className={styles.heroContactItem}>
-                <span>📸</span> {DOCTOR.instagram}
+                <span><i class="fa-brands fa-instagram"></i></span> {DOCTOR.instagram}
               </a>
             </div>
           </div>
@@ -429,7 +429,7 @@ function LocationInfo() {
       ))}
       <a href={`https://wa.me/${DOCTOR.whatsapp}?text=Hola, deseo información sobre consultas`}
         target="_blank" rel="noreferrer" className={styles.waBtn}>
-        💬 Escribir por WhatsApp
+        <i class="fa-brands fa-whatsapp"></i> Escribir por WhatsApp
       </a>
     </div>
   )
