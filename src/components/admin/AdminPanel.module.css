@@ -106,6 +106,18 @@
 .clearBtn:hover { border-color: #10B981; color: #10B981; }
 .filterCount { font-size: .78rem; color: #94A3B8; margin-left: auto; align-self: center; }
 
+.clearBtnActive {
+  border-color: #DC2626;
+  color: #DC2626;
+  font-weight: 700;
+  background: #FEF2F2;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .7; }
+}
+
 /* ── LOADING / EMPTY ─────────────────────────────────────────────────────── */
 .loadingWrap {
   text-align: center; padding: 5rem 1rem; color: #4B7060;

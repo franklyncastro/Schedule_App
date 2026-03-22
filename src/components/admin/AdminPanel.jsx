@@ -26,12 +26,17 @@ const STATUS_LABELS = {
 };
 
 function todayISO() {
-  return new Date().toISOString().split("T")[0];
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function formatDateDisplay(iso) {
   if (!iso) return "—";
-  const [y, m, d] = iso.split("-");
+  const clean = iso.length > 10 ? iso.slice(0, 10) : iso;
+  const [y, m, d] = clean.split("-");
   const months = [
     "ene",
     "feb",
@@ -48,7 +53,6 @@ function formatDateDisplay(iso) {
   ];
   return `${d} ${months[parseInt(m) - 1]} ${y}`;
 }
-
 // ── FETCH ─────────────────────────────────────────────────────────────────────
 async function fetchCitas() {
   if (!CONFIG.SHEETS_SCRIPT_URL) return getDemoData();
@@ -222,13 +226,16 @@ export default function AdminPanel() {
   }, [loadCitas]);
 
   const citasFiltradas = citas.filter((c) => {
-    const matchFecha = fechaFiltro ? c.fecha === fechaFiltro : true;
+    const fechaCita = c.fecha ? c.fecha.slice(0, 10) : "";
+    const matchFecha = fechaFiltro ? fechaCita === fechaFiltro : true;
     const matchStatus =
       statusFiltro === "todos" ? true : c.status === statusFiltro;
     return matchFecha && matchStatus;
   });
 
-  const citasHoy = citas.filter((c) => c.fecha === todayISO());
+  const citasHoy = citas.filter(
+    (c) => (c.fecha || "").slice(0, 10) === todayISO(),
+  );
   const confirmadas = citasHoy.filter((c) => c.status === "confirmada").length;
   const pendientes = citasHoy.filter((c) => c.status === "pendiente").length;
   const canceladas = citasHoy.filter((c) => c.status === "cancelada").length;
@@ -257,7 +264,9 @@ export default function AdminPanel() {
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.headerLogo}>
-            <div className={styles.logoIcon}><i className="fa-solid fa-users-gear"></i></div>
+            <div className={styles.logoIcon}>
+              <i className="fa-solid fa-users-gear"></i>
+            </div>
             <div>
               <div className={styles.logoTitle}>MediCita Admin</div>
               <div className={styles.logoSub}>{DOCTOR.name}</div>
@@ -297,7 +306,8 @@ export default function AdminPanel() {
             <i className="fa-solid fa-download"></i> Exportar
           </button>
           <button className={styles.logoutBtn} onClick={handleLogout}>
-            <i className="fa-solid fa-arrow-right-from-bracket"></i> Cerrar sesión
+            <i className="fa-solid fa-arrow-right-from-bracket"></i> Cerrar
+            sesión
           </button>
         </div>
       </header>
@@ -326,7 +336,9 @@ export default function AdminPanel() {
         {/* FILTROS */}
         <div className={styles.filters}>
           <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}><i class="fa-regular fa-calendar-days"></i> Fecha</label>
+            <label className={styles.filterLabel}>
+              <i className="fa-regular fa-calendar-days"></i> Fecha
+            </label>
             <input
               type="date"
               className={styles.filterInput}
@@ -335,7 +347,9 @@ export default function AdminPanel() {
             />
           </div>
           <div className={styles.filterGroup}>
-            <label className={styles.filterLabel}><i className="fa-solid fa-chart-gantt"></i> Estado</label>
+            <label className={styles.filterLabel}>
+              <i className="fa-solid fa-chart-gantt"></i> Estado
+            </label>
             <select
               className={styles.filterInput}
               value={statusFiltro}
@@ -347,7 +361,7 @@ export default function AdminPanel() {
               <option value="cancelada">Cancelada</option>
             </select>
           </div>
-          <button
+          {/* <button
             className={styles.clearBtn}
             onClick={() => {
               setFechaFiltro("");
@@ -355,7 +369,20 @@ export default function AdminPanel() {
             }}
           >
             <i className="fa-solid fa-filter-circle-xmark"></i> Limpiar
+          </button> */}
+
+          <button
+            className={`${styles.clearBtn} ${statusFiltro !== "todos" || fechaFiltro !== "" ? styles.clearBtnActive : ""}`}
+            onClick={() => {
+              setFechaFiltro("");
+              setStatusFiltro("todos");
+            }}
+          >
+            {statusFiltro !== "todos" || fechaFiltro !== ""
+              ? "🔴 Filtro activo — Limpiar"
+              : "Limpiar"}
           </button>
+
           <div className={styles.filterCount}>
             {citasFiltradas.length} cita{citasFiltradas.length !== 1 ? "s" : ""}
           </div>
@@ -365,7 +392,10 @@ export default function AdminPanel() {
         {loading ? (
           <div className={styles.loadingWrap}>
             <div className={styles.spinner} />
-            <p> <i className="fa-solid fa-spinner"></i> Cargando citas...</p>
+            <p>
+              {" "}
+              <i className="fa-solid fa-spinner"></i> Cargando citas...
+            </p>
           </div>
         ) : citasFiltradas.length === 0 ? (
           <div className={styles.empty}>
@@ -521,7 +551,7 @@ function CitaCard({ cita, updating, onSelect, onStatusChange }) {
       </div>
       <div className={styles.citaNombre}>{cita.nombre}</div>
       <div className={styles.citaFecha}>📅 {formatDateDisplay(cita.fecha)}</div>
-      {cita.cedula && <div className={styles.citaMeta}>🪪 {cita.cedula}</div>}
+      {cita.cedula && <div className={styles.citaMeta}><i class="fa-regular fa-address-card"></i> {cita.cedula}</div>}
       {cita.telefono1 && (
         <div className={styles.citaMeta}>📞 {cita.telefono1}</div>
       )}
@@ -649,7 +679,7 @@ function DetailModal({ cita, updating, onClose, onStatusChange }) {
           </div>
           {cita.telefono1 && (
             <a
-              href={`https://wa.me/${cita.telefono1.replace(/\D/g, "")}`}
+              href={`https://wa.me/${String(cita.telefono1 || "").replace(/\D/g, "")}`}
               target="_blank"
               rel="noreferrer"
               className={styles.waBtn}

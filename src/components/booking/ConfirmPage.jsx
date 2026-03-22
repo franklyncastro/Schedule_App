@@ -12,6 +12,27 @@ export default function ConfirmPage() {
   const [cita, setCita] = useState(null);
   const [status, setStatus] = useState("loading");
 
+  function formatDateDisplay(iso) {
+    if (!iso) return "—";
+    // Manejar tanto ISO completo como solo fecha YYYY-MM-DD
+    const date = new Date(iso);
+    const months = [
+      "enero",
+      "febrero",
+      "marzo",
+      "abril",
+      "mayo",
+      "junio",
+      "julio",
+      "agosto",
+      "septiembre",
+      "octubre",
+      "noviembre",
+      "diciembre",
+    ];
+    return `${months[date.getUTCMonth()]} ${date.getUTCDate()}, ${date.getUTCFullYear()}`;
+  }
+
   useEffect(() => {
     const fetchCita = async () => {
       // ── GOOGLE SHEETS ──────────────────────────────────────────────────
@@ -137,7 +158,7 @@ export default function ConfirmPage() {
                 <strong>Paciente:</strong> {cita.nombre}
               </p>
               <p>
-                <strong>Fecha:</strong> {cita.dateLabel}
+                <strong>Fecha:</strong> {formatDateDisplay(cita.dateLabel)}
               </p>
               <p>
                 <strong>Hora:</strong> {cita.timeLabel}
