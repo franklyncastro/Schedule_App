@@ -74,6 +74,18 @@ function minutesToTime(m) {
   return `${h12}:${min} ${h24 >= 12 ? "PM" : "AM"}`;
 }
 
+// convertir el texto de la hora en minutos totales del día.
+function timeToMinutes(timeStr) {
+  if (!timeStr) return 0;
+  const [time, modifier] = timeStr.split(" ");
+  let [hours, minutes] = time.split(":").map(Number);
+
+  if (hours === 12) hours = 0; // Tratar 12 AM/PM como 0 para el cálculo
+  if (modifier === "PM") hours += 12;
+
+  return hours * 60 + minutes;
+}
+
 function getAvailableSlots(dateISO) {
   const date = new Date(dateISO + "T12:00:00");
   const dow = date.getDay();
@@ -166,7 +178,9 @@ function exportToCSV(citas) {
     c.id,
   ]);
   const csv = [headers, ...rows]
-    .map((r) => r.map((v) => `"${(v || "").replace(/"/g, '""')}"`).join(","))
+    .map((r) =>
+      r.map((v) => `"${String(v || "").replace(/"/g, '""')}"`).join(","),
+    )
     .join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
   const a = document.createElement("a");
@@ -175,82 +189,82 @@ function exportToCSV(citas) {
   a.click();
 }
 
-// function getDemoData() {
-//   const today = todayISO(),
-//     tomorrow = tomorrowISO();
-//   return [
-//     {
-//       id: "1",
-//       nombre: "María González",
-//       telefono1: "809-555-0001",
-//       telefono2: "",
-//       email: "maria@gmail.com",
-//       cedula: "001-1234567-8",
-//       nacimiento: "2018-03-15",
-//       responsable: "Ana González",
-//       fecha: today,
-//       hora: "9:00 AM",
-//       observaciones: "Primera consulta",
-//       status: "confirmada",
-//     },
-//     {
-//       id: "2",
-//       nombre: "Carlos Pérez",
-//       telefono1: "809-555-0002",
-//       telefono2: "",
-//       email: "carlos@gmail.com",
-//       cedula: "002-2345678-9",
-//       nacimiento: "2015-07-22",
-//       responsable: "",
-//       fecha: today,
-//       hora: "9:30 AM",
-//       observaciones: "",
-//       status: "pendiente",
-//     },
-//     {
-//       id: "3",
-//       nombre: "Sofía Ramírez",
-//       telefono1: "809-555-0003",
-//       telefono2: "",
-//       email: "",
-//       cedula: "003-3456789-0",
-//       nacimiento: "2020-11-05",
-//       responsable: "Luis Ramírez",
-//       fecha: tomorrow,
-//       hora: "10:00 AM",
-//       observaciones: "Asma crónica",
-//       status: "pendiente",
-//     },
-//     {
-//       id: "4",
-//       nombre: "Diego Martínez",
-//       telefono1: "809-555-0004",
-//       telefono2: "",
-//       email: "diego@gmail.com",
-//       cedula: "004-4567890-1",
-//       nacimiento: "2016-01-30",
-//       responsable: "",
-//       fecha: today,
-//       hora: "10:30 AM",
-//       observaciones: "",
-//       status: "cancelada",
-//     },
-//     {
-//       id: "5",
-//       nombre: "Lucía Fernández",
-//       telefono1: "809-555-0005",
-//       telefono2: "",
-//       email: "lucia@gmail.com",
-//       cedula: "005-5678901-2",
-//       nacimiento: "2019-05-18",
-//       responsable: "Rosa Fdez.",
-//       fecha: tomorrow,
-//       hora: "11:00 AM",
-//       observaciones: "Control mensual",
-//       status: "confirmada",
-//     },
-//   ];
-// }
+function getDemoData() {
+  const today = todayISO(),
+    tomorrow = tomorrowISO();
+  return [
+    {
+      id: "1",
+      nombre: "María González",
+      telefono1: "809-555-0001",
+      telefono2: "",
+      email: "maria@gmail.com",
+      cedula: "001-1234567-8",
+      nacimiento: "2018-03-15",
+      responsable: "Ana González",
+      fecha: today,
+      hora: "9:00 AM",
+      observaciones: "Primera consulta",
+      status: "confirmada",
+    },
+    {
+      id: "2",
+      nombre: "Carlos Pérez",
+      telefono1: "809-555-0002",
+      telefono2: "",
+      email: "carlos@gmail.com",
+      cedula: "002-2345678-9",
+      nacimiento: "2015-07-22",
+      responsable: "",
+      fecha: today,
+      hora: "9:30 AM",
+      observaciones: "",
+      status: "pendiente",
+    },
+    {
+      id: "3",
+      nombre: "Sofía Ramírez",
+      telefono1: "809-555-0003",
+      telefono2: "",
+      email: "",
+      cedula: "003-3456789-0",
+      nacimiento: "2020-11-05",
+      responsable: "Luis Ramírez",
+      fecha: tomorrow,
+      hora: "10:00 AM",
+      observaciones: "Asma crónica",
+      status: "pendiente",
+    },
+    {
+      id: "4",
+      nombre: "Diego Martínez",
+      telefono1: "809-555-0004",
+      telefono2: "",
+      email: "diego@gmail.com",
+      cedula: "004-4567890-1",
+      nacimiento: "2016-01-30",
+      responsable: "",
+      fecha: today,
+      hora: "10:30 AM",
+      observaciones: "",
+      status: "cancelada",
+    },
+    {
+      id: "5",
+      nombre: "Lucía Fernández",
+      telefono1: "809-555-0005",
+      telefono2: "",
+      email: "lucia@gmail.com",
+      cedula: "005-5678901-2",
+      nacimiento: "2019-05-18",
+      responsable: "Rosa Fdez.",
+      fecha: tomorrow,
+      hora: "11:00 AM",
+      observaciones: "Control mensual",
+      status: "confirmada",
+    },
+  ];
+}
 
 // ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────────
 export default function AdminPanel() {
@@ -280,31 +294,38 @@ export default function AdminPanel() {
 
   // Búsqueda universal
   const searchLower = search.toLowerCase().trim();
-  const citasFiltradas = citas.filter((c) => {
-    const fechaCita = (c.fecha || "").slice(0, 10);
-    const matchFecha = fechaFiltro ? fechaCita === fechaFiltro : true;
-    const matchStatus =
-      statusFiltro === "todos" ? true : c.status === statusFiltro;
-    const matchSearch = !searchLower
-      ? true
-      : String(c.nombre || "")
-          .toLowerCase()
-          .includes(searchLower) ||
-        String(c.email || "")
-          .toLowerCase()
-          .includes(searchLower) ||
-        String(c.cedula || "").includes(searchLower) ||
-        String(c.telefono1 || "").includes(searchLower) ||
-        String(c.telefono2 || "").includes(searchLower) ||
-        String(c.id || "").includes(searchLower) ||
-        String(c.hora || "")
-          .toLowerCase()
-          .includes(searchLower) ||
-        String(c.responsable || "")
-          .toLowerCase()
-          .includes(searchLower);
-    return matchFecha && matchStatus && matchSearch;
-  });
+  const citasFiltradas = citas
+    .filter((c) => {
+      const fechaCita = (c.fecha || "").slice(0, 10);
+      const matchFecha = fechaFiltro ? fechaCita === fechaFiltro : true;
+      const matchStatus =
+        statusFiltro === "todos" ? true : c.status === statusFiltro;
+      const matchSearch = !searchLower
+        ? true
+        : String(c.nombre || "")
+            .toLowerCase()
+            .includes(searchLower) ||
+          String(c.email || "")
+            .toLowerCase()
+            .includes(searchLower) ||
+          String(c.cedula || "").includes(searchLower) ||
+          String(c.telefono1 || "").includes(searchLower) ||
+          String(c.telefono2 || "").includes(searchLower) ||
+          String(c.id || "").includes(searchLower) ||
+          String(c.hora || "")
+            .toLowerCase()
+            .includes(searchLower) ||
+          String(c.responsable || "")
+            .toLowerCase()
+            .includes(searchLower);
+      return matchFecha && matchStatus && matchSearch;
+    })
+    .sort((a, b) => {
+      // Primero ordenamos por fecha (por si hay varias fechas mezcladas)
+      if (a.fecha !== b.fecha) return a.fecha.localeCompare(b.fecha);
+      // Luego ordenamos por hora usando la función timeToMinutes
+      return timeToMinutes(a.hora) - timeToMinutes(b.hora);
+    });
 
   // Stats basadas en lo filtrado
   const total = citasFiltradas.length;
@@ -362,7 +383,9 @@ export default function AdminPanel() {
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <div className={styles.headerLogo}>
-            <div className={styles.logoIcon}><i className="fa-solid fa-users-gear"></i> </div>
+            <div className={styles.logoIcon}>
+              <i className="fa-solid fa-users-gear"></i>{" "}
+            </div>
             <div>
               <div className={styles.logoTitle}>MediCita Admin</div>
               <div className={styles.logoSub}>{DOCTOR.name}</div>
@@ -449,7 +472,9 @@ export default function AdminPanel() {
 
         {/* BUSCADOR */}
         <div className={styles.searchWrap}>
-          <span className={styles.searchIcon}><i class="fa-solid fa-magnifying-glass"></i> </span>
+          <span className={styles.searchIcon}>
+            <i className="fa-solid fa-magnifying-glass"></i>{" "}
+          </span>
           <input
             ref={searchRef}
             className={styles.searchInput}
